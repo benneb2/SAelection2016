@@ -39,6 +39,19 @@ router.get('/getquestion', function(req, res) {
     });
 });
 
+//GET RESULT
+router.get('/getresult', function(req, res) {
+//req.query.id
+   console.log(req.query);
+    var db = req.db;
+    var collection = db.get('result');
+    collection.find({question:req.query.question},{},function(e,docs){
+        res.json(docs);
+    });
+});
+
+
+
 //ADD POLL
 /* GET New Poll page. */
 router.get('/newPoll', function(req, res) {
@@ -132,8 +145,60 @@ router.get('/newQuestion', function(req, res) {
 
 });
 
+//ADD RSULT
+/* GET New Result page. */
+router.get('/newResult', function(req, res) {
+    var db = req.db;
+    var collection = db.get('question');
+
+	console.log(req.query.question);
+    collection.find({_id:req.query.question},{},function(e,docs){
+        console.log(docs);
+        if(docs.length > 0)
+        {
+            res.render('newResult' , { title: 'Add New Result ', question: req.query.question });
+
+        }else
+        {
+                console.log("Not Found");
+                res.render('getpolls',{title : 'POES'});
+
+        }
+    });
+
+});
 
 
+
+
+/* POST to Add Result Service */
+router.post('/addResult', function(req, res) {
+
+    // Set our internal DB variable
+    var db = req.db;
+
+    // Get our form values. These rely on the "name" attributes
+    var rQuestion = req.body.rQuestion;
+    var rResult = req.body.rResult;
+
+    // Set our collection
+    var collection = db.get('result');
+
+    // Submit to the DB
+    collection.insert({
+        "question" : rQuestion,
+        "result" : rResult,
+    }, function (err, doc) {
+        if (err) {
+            // If it failed, return error
+            res.send("There was a problem adding the information to the database.");
+        }
+        else {
+            // And forward to success page
+            res.redirect("getpolls");
+        }
+    });
+});
 
 
 
